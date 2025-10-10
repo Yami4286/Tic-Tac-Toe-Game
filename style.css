@@ -1,0 +1,24 @@
+.container{
+ display: grid;
+ grid-template-rows: 1fr 4fr 1fr;   
+ height: 100vh;
+}
+
+.header{
+    display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.Inside{
+ display: flex;
+        max-width: 960px;
+     max-height: 960px;
+       height: 40rem;
+    width: 40rem;
+     border: 2px solid black;
+}
+
+.board{
+    justify-self: center;
+}
