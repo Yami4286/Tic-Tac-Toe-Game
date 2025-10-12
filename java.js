@@ -5,6 +5,8 @@ pl.Create("Abaid","Y");
 const moves = Moves();
 forGrid(3)
 pl.GetPlayers();
+const robot = Robot();
+
 
 
 
@@ -68,7 +70,7 @@ function Pubsub(){
 
 function CreatePlayer(){
     const Players = [];
-    function Create(Play ,sign){
+    function Create(name ,sign){
         Players.push({name, sign});
     }
 
@@ -88,10 +90,19 @@ function CreatePlayer(){
   
 
 function Moves(){
+const winningSets = [
+  [1,2,3],
+  [4,5,6],
+  [7,8,9],
+  [1,4,7],
+  [2,5,8],
+  [3,6,9],
+  [1,5,9],
+  [3,5,7]
+];
     const pla = pl.GetPlayers();
     const Xmov = [];
     const Ymov = [];
-    const cells = document.querySelectorAll(".row");
      let first = true;
       const Xo = [];
     let curr = pla[0];
@@ -102,28 +113,84 @@ function Moves(){
          MakeMove(e); }
 
     function MakeMove(e){
+      let current = curr.name;
+      let corr = curr.sign;
+      console.log(current);
+         console.log(corr);
               e.target.textContent =  curr.sign;
-     
+              //here starts x logic
+
      if(first){ 
       first = false; 
-      Xmov.push(e.target.dataset.value); 
-      
-      curr = pla[1];
-      if(x == 3){
-       
-      Xo.push({Xmov});
-
-
-      x = 1;
+      Xmov.push(Number(e.target.dataset.value)); 
+      if(x >= 3){ 
+        for(const set of winningSets){
+          const HasWon = set.every(num => Xmov.includes(num));
+          if(HasWon){
+             //timeout logic so dome updates
+          setTimeout(() => {
+    ubsub.Publish("PlayerWon", current);
+  }, 0);
+            break;
+          }
+           //timeout logic so dome updates
+        }
+    
       }
       x++;
+       curr = pla[1];
+       robot.MaketheM();
     } 
-     
-     else { first = true; Ymov.push(e.target.dataset.value); curr = pla[0]; }
+     //this is second player turning logic for moves, above is x logic
+     else { 
+      first = true; 
+      Ymov.push(Number(e.target.dataset.value)); 
+       
+                 if(y >= 3){ 
+        for(const set of winningSets){
+          const HasWon = set.every(num => Ymov.includes(num));
+
+          //timeout logic so dome updates
+          if(HasWon){
+             setTimeout(() => {
+    ubsub.Publish("PlayerWon", current);
+  }, 0);
+            break;
+          }
+ //timeout logic so dome updates
+
+        }
+      }
+      y++;
+       curr = pla[0];  
+             }
+// till here lies y logic
      e.target.style.pointerEvents = "none";
+     
+
      }
 
      return {MakeMove, Signs};
+}
+
+
+function Robot(){
+const cells = document.querySelectorAll(".row");
+
+function check(){
+  return[...cells].filter(cell => cell.textContent === '');
+}
+
+function MaketheM(){
+  const empty = check();
+  if(empty.length === 0) return;
+  let Ran = Math.floor(Math.random() * empty.length);
+  let Chose = empty[Ran];
+
+  Chose.click();
+}
+
+return{MaketheM, check};
 }
 
 
