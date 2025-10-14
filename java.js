@@ -1,9 +1,14 @@
+Game();
+
+
+function Game(){
+
 const ubsub = Pubsub();
 const pl = CreatePlayer();
 pl.Create("Ali","X");
 pl.Create("Abaid","Y");
 const moves = Moves();
-forGrid(3)
+pl.forGrid(3)
 pl.GetPlayers();
 const robot = Robot();
 
@@ -17,37 +22,13 @@ const btn = document.querySelector("#btn");
 btn.addEventListener("click", () =>{
 const name = prompt("Size");
 
-forGrid(name);
+pl.forGrid(name);
 });
 
 function blackhover(e){
     e.target.style.backgroundColor = "Black";
 }
 
-function forGrid(size) {
-    let remov = document.querySelectorAll(".column, .row");
-    remov.forEach(element => {element.remove();});
-  let screen = document.querySelector(".Inside");
-  const screenWidth = screen.clientWidth;
-  let b = 1;
-  for(let i = 0; i < size; i++){
-    let column = document.createElement("div");
-    column.classList.add("column");
-    for(let j = 1 ; j <= size ; j++){
-      let row = document.createElement("div");
-      let Siz = screenWidth/size;
-      row.style.width = Siz + "px";
-      row.style.height = Siz+ "px";
-    
-      row.classList.add("row")
-      row.setAttribute("data-value", b);
-      row.addEventListener("click", moves.Signs);
-     column.appendChild(row);
-    b++
-    }
-    screen.appendChild(column);
-  }
-}
 
 
 
@@ -76,12 +57,39 @@ function CreatePlayer(){
 
     function GetPlayers(){
            ubsub.Subscribe("PlayerWon", (Winner) => {alert(`${Winner} has won`);});
+           ubsub.Subscribe("Draw",()=>{"Game Has Been Drawn"});
+           ubsub.Subscribe("GameOver",()=>{alert("Game Over");})
         return Players;
     }
 
+    function forGrid(size) {
+    let remov = document.querySelectorAll(".column, .row");
+    remov.forEach(element => {element.remove();});
+  let screen = document.querySelector(".Inside");
+  const screenWidth = screen.clientWidth;
+  let b = 1;
+  for(let i = 0; i < size; i++){
+    let column = document.createElement("div");
+    column.classList.add("column");
+    for(let j = 1 ; j <= size ; j++){
+      let row = document.createElement("div");
+      let Siz = screenWidth/size;
+      row.style.width = Siz + "px";
+      row.style.height = Siz+ "px";
+    
+      row.classList.add("row")
+      row.setAttribute("data-value", b);
+      row.addEventListener("click", moves.Signs);
+     column.appendChild(row);
+    b++
+    }
+    screen.appendChild(column);
+  }
+}
+
  
      
-   return{Create,GetPlayers};
+   return{Create,GetPlayers, forGrid};
 }
 
 
@@ -100,14 +108,16 @@ const winningSets = [
   [1,5,9],
   [3,5,7]
 ];
+let IsWon = false;
     const pla = pl.GetPlayers();
-    const Xmov = [];
-    const Ymov = [];
+    let Xmov = [];
+    let Ymov = [];
      let first = true;
       const Xo = [];
     let curr = pla[0];
     let x = 1;
     let y = 1;
+    let z = 1;
 
      function Signs(e){
          MakeMove(e); }
@@ -131,6 +141,8 @@ const winningSets = [
           setTimeout(() => {
     ubsub.Publish("PlayerWon", current);
   }, 0);
+    IsWon = true;
+    clear();
             break;
           }
            //timeout logic so dome updates
@@ -139,7 +151,7 @@ const winningSets = [
       }
       x++;
        curr = pla[1];
-       robot.MaketheM();
+       if(!IsWon)robot.MaketheM();
     } 
      //this is second player turning logic for moves, above is x logic
      else { 
@@ -154,7 +166,9 @@ const winningSets = [
           if(HasWon){
              setTimeout(() => {
     ubsub.Publish("PlayerWon", current);
-  }, 0);
+  }, 110);
+  IsWon = true;
+  clear();
             break;
           }
  //timeout logic so dome updates
@@ -166,18 +180,34 @@ const winningSets = [
              }
 // till here lies y logic
      e.target.style.pointerEvents = "none";
-     
+     let noEmpty = robot.check();
+             if(noEmpty.length === 0 && !IsWon){ubsub.Publish("Draw"); clear(); }else{return;}
+ 
+            
+  return;
+}
 
+     function clear(){
+      Xmov = [];
+      Ymov = [];
+      x = 1;
+      y = 1;
+      curr = pla[0];
+      pl.forGrid(3);
+      IsWon = false;
+      z++;
+        Round(z);
      }
 
-     return {MakeMove, Signs};
+     return {MakeMove, Signs, clear};
 }
 
 
 function Robot(){
-const cells = document.querySelectorAll(".row");
+
 
 function check(){
+  const cells = document.querySelectorAll(".row");
   return[...cells].filter(cell => cell.textContent === '');
 }
 
@@ -187,12 +217,17 @@ function MaketheM(){
   let Ran = Math.floor(Math.random() * empty.length);
   let Chose = empty[Ran];
 
-  Chose.click();
+ setTimeout(()=> { Chose.click();},100);
 }
 
 return{MaketheM, check};
 }
 
+function Round(s){
+   if( s >= 3){   setTimeout(() => {
+    ubsub.Publish("GameOver");
+  }, 110);  }
+}
 
 
-
+}
