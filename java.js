@@ -1,35 +1,61 @@
 Game();
 
 
-function Game(){
+///separate the start function for a clean and good approach or smack your head in the wall
 
-const ubsub = Pubsub();
-const pl = CreatePlayer();
-pl.Create("Ali","X");
-pl.Create("Abaid","Y");
-const moves = Moves();
-pl.forGrid(3)
-pl.GetPlayers();
+function Game(){
+  const popup = document.querySelector("#Start");
+  const form = document.querySelectorAll(".add");
+ 
+   const ubsub = Pubsub();
+   const pl = CreatePlayer();
+ const moves = Moves();
 const robot = Robot();
 
+const outside = document.querySelector("#bt");   // inside-form Start button
+const inside = document.querySelector("#btn");   // top Start button
 
-
-
-
-
-const btn = document.querySelector("#btn");
-
-btn.addEventListener("click", () =>{
-const name = prompt("Size");
-
-pl.forGrid(name);
+inside.addEventListener("click", () =>{
+    const popup = document.querySelector("#Start");
+    popup.classList.remove("hidden");
 });
+
+outside.addEventListener("click", (e) => {
+    e.preventDefault(); // 🛑 stops the reload right here
+    Start();
+});
+
+
 
 function blackhover(e){
     e.target.style.backgroundColor = "Black";
 }
 
+function Start(){
 
+
+  const [Ps1, S1, Ps2, S2] = GetThe();
+  console.log(Ps1);
+
+  if(!Ps1 || !S1 || !Ps2 || !S2){
+    alert("Fill in all boxes");
+    return;
+  }
+
+   
+   pl.Create(Ps1, S1);
+   pl.Create(Ps2,S2);
+  
+   pl.forGrid(3)
+   pl.GetPlayers();
+   
+   popup.classList.add("hidden");
+}
+
+function GetThe(){
+  const values = Array.from(form).map(input => input.value.trim());
+  return values; 
+}
 
 
 function Pubsub(){
