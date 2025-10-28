@@ -53,3 +53,10 @@
 .UI{
     display: flex;
 }
+
+#Won{     position: fixed;
+    z-index: 1000;
+    left: 45vw;
+    top: 39vh;
+    border: solid;
+    padding: 20px;}
