@@ -3,7 +3,14 @@ let S1;
 let Ps2;
 let S2;
 Start();
+reset();
 
+
+
+function reset(){
+ let rese = document.querySelector("#butto");
+ rese.addEventListener("click", ()=>{location.reload();});
+}
 
 function Start(){
   const First = document.querySelector("#btn");
@@ -44,19 +51,14 @@ function Game(){
 const robot = Robot();
  
   
-  
    pl.forGrid(3)
    pl.GetPlayers();
   
 
 
-
-
-
 function blackhover(e){
     e.target.style.backgroundColor = "Black";
 }
-
 
 
 function Pubsub(){
@@ -77,15 +79,52 @@ function Pubsub(){
 
 
 function CreatePlayer(){
+  
     const Players = [];
+    let x = 1;
+    let y = 1;
+       let lose = document.querySelector(".lose");
+      let conti = document.querySelector("#btoc");
+        let won = document.querySelector(".Win");
+      let cont = document.querySelector("#btock");
+      let draw = document.querySelector(".Draw");
+      let cput = document.querySelector("#bto");
     function Create(name ,sign){
         Players.push({name, sign});
     }
 
+     conti.addEventListener("click", ()=> {
+        lose.classList.add("hidden");
+        if(x === 3){ location.reload();}
+       x++;
+      
+      });
+
+       cont.addEventListener("click", ()=> {
+        won.classList.add("hidden");
+        if(y === 3){ location.reload();}
+       y++;
+      
+      });
+      
+      cput.addEventListener("click", ()=> {
+        draw.classList.add("hidden");
+        if(y === 3 || x === 3){ location.reload();}
+       x++;
+       y++;
+      
+      });
+
+
+      function WOn(){ won.classList.remove("hidden");}
+
+      function Lost(){ lose.classList.remove("hidden");}
+     function Drw(){ draw.classList.remove("hidden"); }
+
     function GetPlayers(){
-           ubsub.Subscribe("PlayerWon", (Winner) => {alert(`${Winner} has won`);});
-           ubsub.Subscribe("Draw",()=>{"Game Has Been Drawn"});
-           ubsub.Subscribe("GameOver",()=>{alert("Game Over");})
+           ubsub.Subscribe("PlayerWon", WOn);
+           ubsub.Subscribe("Draw", Drw);
+           ubsub.Subscribe("Lost", Lost);
         return Players;
     }
 
@@ -166,7 +205,7 @@ let IsWon = false;
           if(HasWon){
              //timeout logic so dome updates
           setTimeout(() => {
-    ubsub.Publish("PlayerWon", current);
+    ubsub.Publish("PlayerWon");
   }, 0);
     IsWon = true;
     clear();
@@ -192,7 +231,7 @@ let IsWon = false;
           //timeout logic so dome updates
           if(HasWon){
              setTimeout(() => {
-    ubsub.Publish("PlayerWon", current);
+    ubsub.Publish("Lost");
   }, 110);
   IsWon = true;
   clear();
@@ -250,11 +289,7 @@ function MaketheM(){
 return{MaketheM, check};
 }
 
-function Round(s){
-   if( s >= 3){   setTimeout(() => {
-    ubsub.Publish("GameOver");
-  }, 110);  }
-}
+
 
 
 }
